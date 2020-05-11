@@ -1,12 +1,24 @@
 import React from "react";
 import "./App.css";
 import Card from "./components/Card";
+import Follow from "./components/Follow";
+import styled from "styled-components";
+import GitHubCalendar from 'react-github-calendar';
 
+const Boxy = styled.div `
+display: flex;
+flex-direction: column;
+`;
 
-// export default function App() {
+// const List = styled.div `
+// display: flex;
+// flex-direction: row-wrap;
+// `;
+
 class App extends React.Component {
   state = {
     user: [{}],
+    followers: [],
     error: "",
     userName: "login"
     
@@ -35,68 +47,74 @@ class App extends React.Component {
         console.error("mm: App.js Failure ", err);
         this.setState({ error: err });
       });
-      
-  }
 
-  handleUserChange = e => {
-    this.setState({
-      login: e.target.value
-    });
-  };
+      fetch(`https://api.github.com/users/${this.state.user.login}/followers`)
+      .then(res => res.json(),)
+      .then(follow => {
+        console.log(
+          "mm: App.js: CDM: Fetch: Return statement of collection followers",
+          follow
 
-  handleUserUpdate = e => {
-    fetch(`https://api.github.com/users/${this.login}`)
-      .then(res => {
-        console.log(res);
-        return res.json();
-      })
-      .then(user => {
-        if (user.status === "error") {
-          this.setState({ error: user });
+        );
+        if (follow.status === "error") {
+          this.setState({ error: follow });
         } else {
-          this.setState({ user: user });
+          this.setState({ followers: follow }, () => {console.log(this.state.followers, "follow info")});
+          console.log("mm: App.js: CDM: follower info", follow)
+          // console.log("mm: App.js State Set: ", github)
         }
       })
       .catch(err => {
         console.error("mm: App.js Failure ", err);
         this.setState({ error: err });
       });
-  };
+  }
+  //Attempted to set up user search pattern.
+  // handleUserChange = e => {
+  //   this.setState({
+  //     login: e.target.value
+  //   });
+  // };
+
+  // handleUserUpdate = e => {
+  //   fetch(`https://api.github.com/users/${this.login}`)
+  //     .then(res => {
+  //       console.log(res);
+  //       return res.json();
+  //     })
+  //     .then(user => {
+  //       if (user.status === "error") {
+  //         this.setState({ error: user });
+  //       } else {
+  //         this.setState({ user: user });
+  //       }
+  //     })
+  //     .catch(err => {
+  //       console.error("mm: App.js Failure ", err);
+  //       this.setState({ error: err });
+  //     });
+  // };
+  
 
   render() {
     // console.log("mm: User to pass App.js:", this.state.user)
     return (
       <div className="App">
         <h1>Github User Card</h1>
-        <Card  user={this.state.user} />
-        {/* <div>
-        <p> Test </p>
-        <div>
-        <img src={this.state.user.avatar_url} alt="avatar" />
-        </div>
-        <h3>{this.state.user.name}</h3>
-        <p>User Name: {this.state.user.login}</p>
-        <p>Location: {this.state.user.location}</p>
-        <p></p>
-        <a href="${this.state.user.html_url}">{this.state.user.html_url}</a>
-        <p>Followers: {this.state.user.followers}</p>
-        <p>Following: {this.state.user.following}</p>
-        <p>Bio: {this.state.user.bio}</p>
-    </div> */}
-        <input
+        
+        {/* <input
           type="text"
           placeholder="user name"
-          value={this.state.user.login}
           onChange={this.handleUserChange}
         />
-        <button onClick={this.handleUserUpdate}>Search User</button>
-        {this.state.error ? (
-          <p>there was an error: {this.state.error}</p>
-        ) : (
-          this.state.user.map(user => {
-            return <img src={this.state.user.avatar_url} alt="user" />;
-          })
-        )}
+        <button onClick={this.handleUserUpdate}>Search User</button> */}
+        <Boxy>
+        <GitHubCalendar username="TheTrabin" color="blue" />
+        <Card  user={this.state.user} />
+        
+        <h1>Followers</h1>
+        <Follow followers={this.state.followers} user={this.state.user} />
+        </Boxy>
       </div>
     );
   }
